@@ -1,0 +1,41 @@
+---
+title: "Communication"
+included-by-default: true
+priority: 5
+description: "Messaging and communication commands"
+---
+
+# Communication Commands
+
+## Private Messaging
+
+### /msg
+Send a private message to another player.
+- **Usage:** `/msg <player> <message>`
+- **Example:** `/msg Steve Hey, want to team up?`
+- **Aliases:** `/tell`, `/whisper`, `/w`
+- **Notes:** Only you and the recipient will see the message
+
+### /reply or /r
+Reply to the last person who messaged you.
+- **Usage:** `/r <message>`
+- **Example:** `/r Sure, where are you?`
+- **Notes:** Quick way to continue a conversation
+
+## Social Commands
+
+### /mail
+Send offline messages to players.
+- **Usage:** `/mail send <player> <message>`
+- **Read mail:** `/mail read`
+- **Clear mail:** `/mail clear`
+
+### /ignore
+Block messages from a player.
+- **Usage:** `/ignore <player>`
+- **Unignore:** `/ignore <player>` again
+
+## Tips
+- Use private messages for sensitive information
+- The reply command (/r) saves time in conversations
+- Mail is great for reaching offline friends

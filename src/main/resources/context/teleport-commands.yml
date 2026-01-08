@@ -1,0 +1,42 @@
+---
+title: "Teleport Commands"
+included-by-default: true
+priority: 1
+description: "Basic teleport commands available to all players"
+---
+
+# Teleport Commands
+
+## /spawn
+Teleports you instantly to the spawn area. Great for regrouping or escaping threats.
+- **Usage:** `/spawn`
+- **Cooldown:** None
+- **Category:** Utility
+
+## /rtp (Random Teleport)
+Teleports you to a random safe spot in the overworld. Perfect for finding new areas to explore.
+- **Usage:** `/rtp`
+- **Aliases:** `/randomtp`, `/wild`
+- **Category:** Utility
+- **Notes:** Only works in the overworld, finds safe ground away from danger
+
+## /tpa (Teleport Request)
+Send a teleport request to another player.
+- **Usage:** `/tpa <playername>`
+- **Example:** `/tpa Steve` - Request to teleport to Steve
+- **Category:** Utility
+
+## /tpaccept
+Accept a pending teleport request from another player.
+- **Usage:** `/tpaccept`
+- **Notes:** Request expires after 60 seconds
+
+## /tpdeny
+Deny a pending teleport request.
+- **Usage:** `/tpdeny`
+
+## /back
+Return to your previous location after teleporting or dying.
+- **Usage:** `/back`
+- **Notes:** Works after any teleport command and after death (if enabled)
+- **Category:** Utility

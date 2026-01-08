@@ -1,0 +1,111 @@
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║                           WDP-Help Configuration                            ║
+# ║                    AI-Powered Help System v1.0.0                            ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+# Configuration version - DO NOT EDIT
+config-version: 2
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                              AI Settings                                     │
+# └─────────────────────────────────────────────────────────────────────────────┘
+ai:
+  # API Base URL (OpenRouter or any OpenAI-compatible endpoint)
+  # OpenRouter: https://openrouter.ai/api/v1
+  # OpenAI: https://api.openai.com/v1
+  base-url: "https://openrouter.ai/api/v1"
+  
+  # API Key - Required for authentication
+  # Get your key from https://openrouter.ai/keys
+  api-key: "YOUR_API_KEY_HERE"
+  
+  # Model to use for responses
+  # OpenRouter examples: openai/gpt-4o, anthropic/claude-3-opus, google/gemini-pro
+  # See https://openrouter.ai/models for full list
+  model: "openai/gpt-4o-mini"
+  
+  # OpenRouter specific headers
+  openrouter:
+    # Enable OpenRouter-specific headers
+    enabled: true
+    # Site URL for rankings (optional)
+    site-url: "https://wdpserver.com"
+    # Site/Product title shown on OpenRouter rankings
+    site-title: "WDP-Server"
+  
+  # Request settings
+  request:
+    # Maximum tokens in response
+    max-tokens: 1024
+    # Temperature (0.0 - 2.0, lower = more focused)
+    temperature: 0.7
+    # Request timeout in seconds
+    timeout: 30
+    # Enable streaming responses (recommended)
+    stream: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                           Context Settings                                   │
+# └─────────────────────────────────────────────────────────────────────────────┘
+context:
+  # Directory containing context files (relative to plugin folder)
+  directory: "context"
+  
+  # Maximum total context length (characters)
+  max-length: 15000
+  
+  # Include player's recent conversation history
+  history:
+    # Number of recent messages to include
+    count: 5
+    # Only include if player asked same question 3+ times
+    suggest-help-after: 3
+    # Minimum relevance score (0-10) to save in history
+    # Questions below this score won't be saved
+    # 10 = Server-specific, 7-9 = Server gameplay, 4-6 = General Minecraft, 1-3 = Off-topic
+    relevance-threshold: 6
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                           Display Settings                                   │
+# └─────────────────────────────────────────────────────────────────────────────┘
+display:
+  # Header shown before AI response
+  header: "&#FFD700━━━━ &#FFFFFF&lWDP Help &#FFD700━━━━"
+  
+  # Footer shown after AI response
+  footer: "&#FFD700━━━━━━━━━━━━━━━━━━━━"
+  
+  # Prefix for AI messages
+  ai-prefix: "&#55FFFF"
+  
+  # Thinking animation settings
+  thinking:
+    # Initial message
+    initial: "&#AAAAAA● &#FFFFFFThinking..."
+    # Dot animation pattern (● = highlighted)
+    dots-pattern:
+      - "&#FFD700● &#AAAAAA○ ○"
+      - "&#AAAAAA○ &#FFD700● &#AAAAAA○"
+      - "&#AAAAAA○ ○ &#FFD700●"
+    # Animation speed in ticks (20 ticks = 1 second)
+    animation-speed: 5
+    # Delay before showing rotating messages (seconds)
+    message-delay: 5
+    # Interval between rotating messages (seconds)
+    message-interval: 3
+  
+  # Tool usage display
+  tool:
+    prefix: "&#FFAA00⚡ "
+    suffix: ""
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                            Debug Settings                                    │
+# └─────────────────────────────────────────────────────────────────────────────┘
+debug:
+  # Enable debug mode
+  enabled: false
+  # Log API requests
+  log-requests: false
+  # Log API responses
+  log-responses: false

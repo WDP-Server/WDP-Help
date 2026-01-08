@@ -1,0 +1,56 @@
+---
+title: "Base Detection System"
+included-by-default: false
+priority: 21
+description: "Automatic base protection and detection"
+---
+
+# Base Detection System (WDP-BaseDet)
+
+The server automatically detects and protects player bases!
+
+## How It Works
+
+### Automatic Detection
+The server monitors player activity to identify bases:
+- Building activity
+- Chest placement
+- Time spent in an area
+- Block modifications
+
+### Protection
+Once a base is detected:
+- You'll be notified
+- Basic protection is applied
+- You can manage trust settings
+
+## Trust System
+
+### Managing Trusted Players
+Use the trust GUI to manage who can access your base:
+- Add trusted players
+- Remove trusted players
+- Set different trust levels
+
+### Trust Levels
+- **Full Trust:** Can build, break, and access containers
+- **Container Trust:** Can access chests only
+- **Access Trust:** Can use doors and buttons
+
+## Commands
+
+### Base Management
+- Check your base status through the GUI
+- Manage trusted players
+- View base boundaries
+
+## Offline Protection
+Your base gets extra protection when you're offline:
+- Reduced damage from other players
+- Notifications sent to Discord when attacked
+- Activity logging for review
+
+## Tips
+- Build a clear base structure for better detection
+- Use the trust system wisely
+- Check Discord for offline raid notifications

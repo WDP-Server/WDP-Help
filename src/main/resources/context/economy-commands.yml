@@ -1,0 +1,47 @@
+---
+title: "Economy & Money"
+included-by-default: true
+priority: 2
+description: "Server economy system and currency commands"
+---
+
+# Economy System
+
+The server uses **SkillCoins** as its main currency. You earn coins by playing, completing quests, and leveling up skills.
+
+## Currency Types
+
+### ⛃ SkillCoins (Coins)
+- Main currency for trading and purchases
+- Earned through gameplay and quests
+- Used in the shop for items and equipment
+
+### 🎟 SkillTokens (Tokens)
+- Premium currency for skill upgrades
+- Earned from quest completions and achievements
+- Used to purchase skill-related items
+
+## Commands
+
+### /pay
+Send money to another player.
+- **Usage:** `/pay <player> <amount>`
+- **Example:** `/pay Steve 100` - Send 100 coins to Steve
+- **Category:** Economy
+
+### /balance or /bal
+Check your current balance.
+- **Usage:** `/balance` or `/bal`
+- **Shows:** Both coins and tokens
+
+### /shop
+Open the server shop to buy and sell items.
+- **Usage:** `/shop`
+- **Notes:** Browse categories to find what you need
+
+## Earning Money
+- Complete quests (especially starter quests!)
+- Level up your skills
+- Sell items in the shop
+- Participate in server events
+- Defeat the Rogue Wanderer (special event)

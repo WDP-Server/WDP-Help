@@ -1,0 +1,44 @@
+---
+title: "Server Information"
+included-by-default: true
+priority: 0
+description: "General server information and rules"
+---
+
+# WDP Server
+
+Welcome to WDP Server - a survival Minecraft experience with custom features!
+
+## Server Features
+- **Custom Skills System** - Level up and gain abilities
+- **Economy** - Earn and spend SkillCoins
+- **Quests** - Complete objectives for rewards
+- **Base Protection** - Automatic base detection and protection
+- **Discord Integration** - Link accounts for extra features
+- **Special Events** - Like the Rogue Wanderer hunt!
+
+## Getting Started
+1. Use `/start` to begin the starter quest chain
+2. Complete quests to learn the server basics
+3. Link your Discord for full features
+4. Explore and have fun!
+
+## Important Commands Quick Reference
+- `/start` - Start/view quests
+- `/spawn` - Return to spawn
+- `/rtp` - Random teleport
+- `/home` - Teleport home (requires Discord link)
+- `/skills` - View your skills
+- `/shop` - Open the shop
+- `/help [question]` - Ask me anything!
+
+## Rules
+1. Be respectful to other players
+2. No griefing unprotected bases
+3. No hacking or exploiting
+4. Have fun!
+
+## Support
+- Use `/help [question]` to ask questions
+- Join Discord for community support
+- Report issues to staff members

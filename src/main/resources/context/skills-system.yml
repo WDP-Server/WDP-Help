@@ -1,0 +1,50 @@
+---
+title: "Skills System (AuraSkills)"
+included-by-default: true
+priority: 6
+description: "Overview of the skills and leveling system"
+---
+
+# Skills System
+
+The server uses **AuraSkills** - a comprehensive skill system that rewards you for activities!
+
+## How It Works
+- Perform activities to gain XP in related skills
+- Level up skills to unlock abilities and bonuses
+- Earn SkillTokens for skill-related purchases
+
+## Main Skills
+
+### 🪓 Foraging
+- **Gain XP by:** Chopping trees, breaking logs
+- **Bonuses:** Better drops, faster chopping
+
+### ⛏️ Mining
+- **Gain XP by:** Mining ores and stone
+- **Bonuses:** Double drops, experience boost
+
+### 🎣 Fishing
+- **Gain XP by:** Catching fish
+- **Bonuses:** Rare catches, better loot
+
+### 🌾 Farming
+- **Gain XP by:** Harvesting crops
+- **Bonuses:** Crop yields, replanting
+
+### ⚔️ Fighting
+- **Gain XP by:** Defeating mobs
+- **Bonuses:** Damage boost, combat abilities
+
+## Commands
+
+### /skills
+Open the skills menu to view your progress.
+- **Usage:** `/skills`
+
+### /stats
+View your detailed statistics.
+- **Usage:** `/stats`
+
+## Starter Quest
+New players: Complete Quest 2 by reaching Foraging level 1! Just chop a few trees to get started.

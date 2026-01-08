@@ -1,0 +1,42 @@
+---
+title: "Home System"
+included-by-default: true
+priority: 4
+description: "Setting and using homes"
+---
+
+# Home System
+
+Save locations and teleport back to them anytime!
+
+**⚠️ Important:** The home system requires a linked Discord account. Use `/discord link` first!
+
+## Commands
+
+### /sethome
+Mark your current location as home.
+- **Usage:** `/sethome` or `/sethome <name>`
+- **Example:** `/sethome base` - Save a home named "base"
+- **Requirement:** Linked Discord account
+- **Category:** Utility
+
+### /home
+Teleport to your saved home.
+- **Usage:** `/home` or `/home <name>`
+- **Example:** `/home base` - Teleport to your "base" home
+- **Requirement:** Linked Discord account
+
+### /delhome
+Delete a saved home.
+- **Usage:** `/delhome <name>`
+- **Example:** `/delhome oldbase`
+
+### /homes
+List all your saved homes.
+- **Usage:** `/homes`
+
+## Tips
+- Set your home at your main base for easy return
+- Name homes descriptively (e.g., "farm", "mine", "shop")
+- The default home (no name) is accessed with just `/home`
+- Link Discord first! Use `/discord link` to get started

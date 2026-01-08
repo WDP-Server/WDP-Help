@@ -1,0 +1,46 @@
+---
+title: "Rogue Wanderer"
+included-by-default: false
+priority: 20
+description: "Special server event - Hunt the Rogue Wanderer for rewards"
+---
+
+# The Rogue Wanderer Event
+
+Hunt down the mysterious Rogue Wanderer roaming the server for valuable rewards!
+
+## Quick Start
+1. Use **/hint** to get your current clue for the Wanderer's location
+2. Hunt it down and defeat it
+3. Defeat it 3 times to earn a rare **Beam Stone**
+4. Check Discord for spawn notifications
+
+## How The Hunt Works
+
+### Getting Hints
+- **Command:** `/hint`
+- Hints update daily at **15:00 server time**
+- Your first hint gets you started
+- Each defeat gives you better hints to find the next spawn
+- Hints get more specific as you get closer
+
+### Winning Rewards
+- **First Defeat:** Standard loot drops
+- **Second Defeat:** Improved rewards
+- **Third Defeat:** Earn the rare **Beam Stone** (valuable item!)
+- Hunt it again for additional loot
+
+### Strategy Tips
+- Bring good combat gear (the Wanderer is tough)
+- Team up with other players for better odds
+- Check the Discord #wanderer-hunts channel for updates
+- Use `/hint` regularly for the latest location clue
+- The Wanderer moves, so hints change as you search
+
+## Discord Integration
+Join the server Discord for real-time notifications:
+- **#wanderer-hunts** - Spawn alerts
+- **#hunts-completed** - Victory announcements
+- **#hints-updates** - New hints available
+
+The Wanderer hunt is a core server event - everyone participates. Track it down and claim your rewards!

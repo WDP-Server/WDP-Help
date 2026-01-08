@@ -1,0 +1,45 @@
+---
+title: "Discord Integration"
+included-by-default: true
+priority: 3
+description: "Discord linking and integration features"
+---
+
+# Discord Integration
+
+Link your Minecraft account to Discord for extra features and benefits!
+
+## How to Link
+
+### /discord link
+Start the linking process.
+- **Usage:** `/discord link`
+- **What happens:** You'll receive a unique code
+- **Next step:** Go to the #link channel on Discord and use the code
+
+### Discord #link Channel
+1. Join our Discord server
+2. Find the #link channel
+3. Type your linking code
+4. Your accounts will be connected!
+
+## Benefits of Linking
+
+### Synced Roles
+- Your in-game rank appears on Discord
+- Special perks for linked members
+
+### Chat Integration
+- Messages can be shared between game and Discord
+- Stay connected even when offline
+
+### /home Command Access
+- **Important:** The /home system requires a linked Discord account
+- This is to prevent abuse and maintain server security
+
+### Notifications
+- Receive important server updates
+- Get notified about events and special occasions
+
+## Discord Server
+Join our community! Ask in-game for the Discord link if you haven't joined yet.

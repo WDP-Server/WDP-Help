@@ -1,0 +1,107 @@
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║                           WDP-Help Messages                                  ║
+# ║                    Supports hex colors: &#RRGGBB                             ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+# Language version
+language-version: "1.0.0"
+
+# Prefix for all messages
+prefix: "&#FFD700[Help]&#FFFFFF "
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                           Help Command Messages                              │
+# └─────────────────────────────────────────────────────────────────────────────┘
+help:
+  # When player uses /help without a question
+  menu:
+    header: "&#FFD700━━━━ &#FFFFFF&lWDP Help System &#FFD700━━━━"
+    description: "&#AAAAAAType &#55FFFF/help [question]&#AAAAAA to ask anything!"
+    recent-header: "&#FFFF55Recent Questions:"
+    recent-item: "&#AAAAAA• &#FFFFFF{title}"
+    recent-short: "  &#888888{short}"
+    no-recent: "&#AAAAAANo recent questions yet."
+    footer: "&#FFD700━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+  # Tip shown when player asks same question multiple times
+  repeat-tip: "&#FFAA00💡 Tip: Use &#FFFFFF/help &#FFAA00to see your recent answers!"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                           Error Messages                                     │
+# └─────────────────────────────────────────────────────────────────────────────┘
+error:
+  # API errors
+  api-error: "&#FF5555Oops! I couldn't reach my brain. Try again in a moment!"
+  timeout: "&#FF5555I'm thinking too hard! Try a simpler question."
+  rate-limit: "&#FF5555Slow down! I need a moment to catch my breath."
+  invalid-key: "&#FF5555My memory is locked! Ask an admin to check the API key."
+  
+  # Permission errors
+  no-permission: "&#FF5555You don't have permission to use this command."
+  
+  # Other
+  player-only: "&#FF5555This command can only be used by players."
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                        Admin Command Messages                                │
+# └─────────────────────────────────────────────────────────────────────────────┘
+admin:
+  reload-success: "&#55FF55Configuration reloaded successfully!"
+  reload-fail: "&#FF5555Failed to reload configuration!"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                     Thinking/Waiting Messages                                │
+# │              Shown while AI is generating response                           │
+# │                   Cycles every 3 seconds after 5s                            │
+# └─────────────────────────────────────────────────────────────────────────────┘
+thinking-messages:
+  - "&#AAAAAASearching through server knowledge..."
+  - "&#AAAAAAConsulting the ancient scrolls..."
+  - "&#AAAAAADigging through my memories..."
+  - "&#AAAAAAAsking the server spirits..."
+  - "&#AAAAAAUnraveling the mysteries..."
+  - "&#AAAAAAAAnother moment please..."
+  - "&#AAAAAABrewing up an answer..."
+  - "&#AAAAAAPolishing my response..."
+  - "&#AAAAAAChecking every corner..."
+  - "&#AAAAAAAlmost there..."
+  - "&#AAAAAAGathering wisdom..."
+  - "&#AAAAAADecoding the question..."
+  - "&#AAAAAAScanning the archives..."
+  - "&#AAAAAAProcessing your request..."
+  - "&#AAAAAAFinding the best answer..."
+  - "&#AAAAAAExploring possibilities..."
+  - "&#AAAAAAConnecting the dots..."
+  - "&#AAAAAACrafting a response..."
+  - "&#AAAAAASearching the depths..."
+  - "&#AAAAAAConsulting the experts..."
+  - "&#AAAAAALoading knowledge banks..."
+  - "&#AAAAAAPiecing it together..."
+  - "&#AAAAAAInvestigating further..."
+  - "&#AAAAAAReading between the lines..."
+  - "&#AAAAAASifting through data..."
+  - "&#AAAAAABuilding your answer..."
+  - "&#AAAAAAAligning the stars..."
+  - "&#AAAAAAFinding the right words..."
+  - "&#AAAAAAHunting for clues..."
+  - "&#AAAAAAQuerying the void..."
+  - "&#AAAAAAMining for information..."
+  - "&#AAAAAATraversing the wiki..."
+  - "&#AAAAAAChanneling server energy..."
+  - "&#AAAAAATapping into wisdom..."
+  - "&#AAAAAAForging an answer..."
+  - "&#AAAAAADeciphering secrets..."
+  - "&#AAAAAAAnalyzing patterns..."
+  - "&#AAAAAASpinning up neurons..."
+  - "&#AAAAAACompiling knowledge..."
+  - "&#AAAAAAAsking the oracle..."
+  - "&#AAAAAANavigating the maze..."
+  - "&#AAAAAAPondering deeply..."
+  - "&#AAAAAACrunching the data..."
+  - "&#AAAAAAUnlocking insights..."
+  - "&#AAAAAASeeking enlightenment..."
+  - "&#AAAAAAFormulating response..."
+  - "&#AAAAAACrossing the streams..."
+  - "&#AAAAAATuning into wisdom..."
+  - "&#AAAAAAGathering intel..."
+  - "&#AAAAAAFinalizing thoughts..."
