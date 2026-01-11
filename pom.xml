@@ -6,7 +6,7 @@
 
     <groupId>com.wdp</groupId>
     <artifactId>wdp-help</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
     <packaging>jar</packaging>
     <name>WDP-Help</name>
     <description>AI-Powered Help System for WDP Server</description>

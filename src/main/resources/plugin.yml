@@ -9,19 +9,140 @@ website: https://wdpserver.com
 commands:
   help:
     description: AI-powered help system - ask any question!
-    usage: /<command> [question]
-    aliases: [wdphelp, askhelp, serverhelp]
+    usage: /<command> [question|topics|search <term>|history]
+    aliases: [wdphelp, askhelp, serverhelp, ?]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              PERMISSIONS SYSTEM
+# ═══════════════════════════════════════════════════════════════════════════════
+# Comprehensive permission nodes for controlling help system access
+# ═══════════════════════════════════════════════════════════════════════════════
 
 permissions:
+  # ─── Base Player Permissions ───
   wdphelp.use:
-    description: Allows using the help command
+    description: Base permission to use the help system
     default: true
+    children:
+      wdphelp.ask: true
+      wdphelp.topics: true
+      wdphelp.search: true
+  
+  wdphelp.ask:
+    description: Ask questions to the AI help system
+    default: true
+  
+  wdphelp.topics:
+    description: View available help topics
+    default: true
+  
+  wdphelp.search:
+    description: Search help database
+    default: true
+  
+  wdphelp.history:
+    description: View your question history
+    default: true
+  
+  # ─── Advanced Features ───
+  wdphelp.suggest:
+    description: Suggest new help topics or improvements
+    default: true
+  
+  wdphelp.rate:
+    description: Rate help responses
+    default: true
+  
+  wdphelp.cooldown.bypass:
+    description: Bypass help command cooldown
+    default: op
+  
+  # ─── Topic Access Permissions ───
+  wdphelp.topic.gameplay:
+    description: Access gameplay-related help
+    default: true
+  
+  wdphelp.topic.commands:
+    description: Access command help
+    default: true
+  
+  wdphelp.topic.economy:
+    description: Access economy-related help
+    default: true
+  
+  wdphelp.topic.skills:
+    description: Access skills/leveling help
+    default: true
+  
+  wdphelp.topic.quests:
+    description: Access quest-related help
+    default: true
+  
+  wdphelp.topic.bases:
+    description: Access base protection help
+    default: true
+  
+  wdphelp.topic.rules:
+    description: Access server rules and policies
+    default: true
+  
+  wdphelp.topic.advanced:
+    description: Access advanced gameplay help
+    default: true
+  
+  # ─── Admin Permissions ───
   wdphelp.admin:
-    description: Admin permissions for WDP-Help
+    description: Full admin access to help system
     default: op
+    children:
+      wdphelp.admin.reload: true
+      wdphelp.admin.debug: true
+      wdphelp.admin.edit: true
+      wdphelp.admin.viewall: true
+      wdphelp.admin.clear: true
+      wdphelp.admin.stats: true
+      wdphelp.cooldown.bypass: true
+  
   wdphelp.admin.reload:
-    description: Allows reloading the plugin configuration
+    description: Reload help system configuration
     default: op
+  
   wdphelp.admin.debug:
-    description: Allows viewing debug information
+    description: View debug information for help system
     default: op
+  
+  wdphelp.admin.edit:
+    description: Edit help topics and responses
+    default: op
+  
+  wdphelp.admin.viewall:
+    description: View all player help history
+    default: op
+  
+  wdphelp.admin.clear:
+    description: Clear help cache and history
+    default: op
+  
+  wdphelp.admin.stats:
+    description: View help system statistics
+    default: op
+  
+  # ─── Notification Permissions ───
+  wdphelp.notify:
+    description: Receive notifications for help system events
+    default: op
+    children:
+      wdphelp.notify.questions: true
+      wdphelp.notify.suggestions: true
+      wdphelp.notify.errors: true
+  
+  wdphelp.notify.questions:
+    description: Notified when players ask questions
+    default: op
+  
+  wdphelp.notify.suggestions:
+    description: Notified when players suggest improvements
+    default: op
+  
+  wdphelp.notify.errors:
+    description: Notified when help system encounters errors
