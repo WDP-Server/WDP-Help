@@ -1,10 +1,10 @@
 # ╔═══════════════════════════════════════════════════════════════════════════╗
 # ║                           WDP-Help Configuration                            ║
-# ║                    AI-Powered Help System v1.0.0                            ║
+# ║                    AI-Powered Help System v1.0.1                            ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 
 # Configuration version - DO NOT EDIT
-config-version: 2
+config-version: 3
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                              AI Settings                                     │
@@ -98,6 +98,17 @@ display:
   tool:
     prefix: "&#FFAA00⚡ "
     suffix: ""
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                          Thread Settings                                    │
+# └─────────────────────────────────────────────────────────────────────────────┘
+thread:
+  # Enable warnings when thread usage is high
+  warning-enabled: true
+  # Maximum threads for AI requests (10 recommended for most servers)
+  max-threads: 10
+  # Queue size for pending requests (50 recommended)
+  queue-size: 50
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                            Debug Settings                                    │

@@ -22,7 +22,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
 /**
@@ -34,8 +36,10 @@ public class AIService {
     private final WDPHelpPlugin plugin;
     private final Gson gson;
     private ExecutorService executor;
+    private int maxThreads;
+    private int maxQueueSize;
+    private boolean warningEnabled;
     
-    // System prompt for the AI
     private static final String SYSTEM_PROMPT = """
         You are a confident and knowledgeable helper for the WDP Minecraft Server. Answer player questions with authority and clarity.
         
@@ -74,8 +78,8 @@ public class AIService {
         FORMATTING - KEEP IT MINIMAL:
         - DO NOT use color codes. Plain text only.
         - For commands: just write /command (do not color them) and explain the arguments like /command§7[argument]§f
-        - For numbered lists: use simple format like "1. First step\\n2. Second step\\n3. Third step"
-        - Use \\n only for actual line breaks between ideas
+        - For numbered lists: use simple format like "1. First step\n2. Second step\n3. Third step"
+        - Use \n only for actual line breaks between ideas
         - NO fancy formatting, NO colors, NO emphasis
         - The answer should be almost entirely plain text 
         
@@ -96,35 +100,59 @@ public class AIService {
     public AIService(WDPHelpPlugin plugin) {
         this.plugin = plugin;
         this.gson = new Gson();
-        this.executor = Executors.newCachedThreadPool();
+        initializeExecutor();
     }
     
-    /**
-     * Reload the AI service
-     */
+    private void initializeExecutor() {
+        ConfigManager config = plugin.getConfigManager();
+        warningEnabled = config.isThreadWarningEnabled();
+        maxThreads = config.getMaxThreads();
+        maxQueueSize = config.getThreadQueueSize();
+        
+        this.executor = new ThreadPoolExecutor(
+            2, 
+            maxThreads, 
+            30L, 
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(maxQueueSize),
+            (r, exec) -> {
+                if (warningEnabled) {
+                    plugin.getLogger().warning("[AI-SERVICE] Task queue full, dropping request. Active: " + 
+                        ((ThreadPoolExecutor) exec).getActiveCount() + ", Queue: " + 
+                        exec.getQueue().size());
+                }
+            }
+        );
+    }
+    
+    private void logThreadWarning(String operation) {
+        if (!warningEnabled) return;
+        
+        ThreadPoolExecutor tpe = (ThreadPoolExecutor) executor;
+        int active = tpe.getActiveCount();
+        int queued = tpe.getQueue().size();
+        double usagePercent = (double) active / maxThreads * 100;
+        
+        if (usagePercent >= 80) {
+            plugin.getLogger().warning("[AI-SERVICE] High thread usage during " + operation + 
+                ": active=" + active + "/" + maxThreads + " (" + String.format("%.1f", usagePercent) + 
+                "%), queued=" + queued);
+        }
+    }
+    
     public void reload() {
-        // Nothing to reload currently, but available for future use
+        if (executor != null && !executor.isShutdown()) {
+            executor.shutdown();
+        }
+        initializeExecutor();
     }
     
-    /**
-     * Shutdown the AI service
-     */
     public void shutdown() {
         if (executor != null && !executor.isShutdown()) {
             executor.shutdown();
         }
     }
     
-    /**
-     * Send a question to the AI and get a streaming response
-     * 
-     * @param playerUUID Player asking the question
-     * @param question The question text
-     * @param onChunk Callback for each chunk of text received
-     * @param onToolUse Callback when AI uses a tool (message to display)
-     * @param onComplete Callback when response is complete (full text)
-     * @param onError Callback on error
-     */
     public CompletableFuture<Void> askQuestion(
             UUID playerUUID,
             String question,
@@ -135,37 +163,31 @@ public class AIService {
     ) {
         return CompletableFuture.runAsync(() -> {
             try {
+                logThreadWarning("askQuestion");
                 ConfigManager config = plugin.getConfigManager();
                 
-                // Check if API key is configured
                 if (!config.isApiKeyConfigured()) {
                     onError.accept("API key not configured!");
                     return;
                 }
                 
-                // Build context
                 String context = buildContext(playerUUID);
                 
-                // Build messages array
                 JsonArray messages = new JsonArray();
                 
-                // System message with context
                 JsonObject systemMessage = new JsonObject();
                 systemMessage.addProperty("role", "system");
                 systemMessage.addProperty("content", SYSTEM_PROMPT + "\n\n" + context);
                 messages.add(systemMessage);
                 
-                // Add conversation history
                 PlayerHelpData playerData = plugin.getPlayerDataManager().getData(playerUUID);
                 if (playerData != null) {
                     for (HelpAnswer answer : playerData.getRecentAnswers()) {
-                        // Add user question
                         JsonObject userMsg = new JsonObject();
                         userMsg.addProperty("role", "user");
                         userMsg.addProperty("content", answer.getQuestion());
                         messages.add(userMsg);
                         
-                        // Add assistant response (short version)
                         JsonObject assistantMsg = new JsonObject();
                         assistantMsg.addProperty("role", "assistant");
                         assistantMsg.addProperty("content", answer.getShortDescription());
@@ -173,13 +195,11 @@ public class AIService {
                     }
                 }
                 
-                // Add current question
                 JsonObject userQuestion = new JsonObject();
                 userQuestion.addProperty("role", "user");
                 userQuestion.addProperty("content", question);
                 messages.add(userQuestion);
                 
-                // Build request body
                 JsonObject requestBody = new JsonObject();
                 requestBody.addProperty("model", config.getModel());
                 requestBody.add("messages", messages);
@@ -187,23 +207,19 @@ public class AIService {
                 requestBody.addProperty("temperature", config.getTemperature());
                 requestBody.addProperty("stream", config.isStreamEnabled());
                 
-                // Always force JSON response format
                 JsonObject responseFormat = new JsonObject();
                 responseFormat.addProperty("type", "json_object");
                 requestBody.add("response_format", responseFormat);
                 
-                // Add tools if available (tool calls happen separately from response content)
                 JsonArray tools = buildTools();
                 if (tools.size() > 0) {
                     requestBody.add("tools", tools);
                 }
                 
-                // Log request if debug enabled
                 if (config.isLogRequests()) {
                     plugin.getLogger().info("AI Request: " + gson.toJson(requestBody));
                 }
                 
-                // Make the request
                 if (config.isStreamEnabled()) {
                     streamRequest(requestBody, onChunk, onToolUse, onComplete, onError);
                 } else {
@@ -218,20 +234,14 @@ public class AIService {
         }, executor);
     }
     
-    /**
-     * Build the context string for the AI
-     */
     private String buildContext(UUID playerUUID) {
         StringBuilder context = new StringBuilder();
         
-        // Add player-specific info
         context.append("=== Player Information ===\n");
         
-        // Check DiscordSRV integration for Discord link status (using reflection since it's optional)
         try {
             org.bukkit.plugin.Plugin discordPlugin = plugin.getServer().getPluginManager().getPlugin("DiscordSRV");
             if (discordPlugin != null && discordPlugin.isEnabled()) {
-                // Use reflection to call DiscordSRV.getAccountLinkManager().getDiscordId(UUID)
                 Object accountLinkManager = discordPlugin.getClass().getMethod("getAccountLinkManager").invoke(discordPlugin);
                 Object discordId = accountLinkManager.getClass().getMethod("getDiscordId", UUID.class).invoke(accountLinkManager, playerUUID);
                 
@@ -242,19 +252,16 @@ public class AIService {
                 }
             }
         } catch (Exception e) {
-            // DiscordSRV not available or error - skip silently
         }
         
         context.append("\n");
         
-        // Add default context files
         List<ContextFile> defaultFiles = plugin.getContextManager().getDefaultContextFiles();
         for (ContextFile file : defaultFiles) {
             context.append("=== ").append(file.getTitle()).append(" ===\n");
             context.append(file.getContent()).append("\n\n");
         }
         
-        // Trim if too long
         ConfigManager config = plugin.getConfigManager();
         if (context.length() > config.getMaxContextLength()) {
             context = new StringBuilder(context.substring(0, config.getMaxContextLength()));
@@ -264,9 +271,6 @@ public class AIService {
         return context.toString();
     }
     
-    /**
-     * Build tools array for function calling
-     */
     private JsonArray buildTools() {
         JsonArray tools = new JsonArray();
         
@@ -275,7 +279,6 @@ public class AIService {
             return tools;
         }
         
-        // Create fetch_context function definition
         JsonObject tool = new JsonObject();
         tool.addProperty("type", "function");
         
@@ -312,9 +315,6 @@ public class AIService {
         return tools;
     }
     
-    /**
-     * Make a streaming request to the API
-     */
     private void streamRequest(
             JsonObject requestBody,
             Consumer<String> onChunk,
@@ -333,18 +333,15 @@ public class AIService {
             connection.setConnectTimeout(config.getTimeout() * 1000);
             connection.setReadTimeout(config.getTimeout() * 1000);
             
-            // Set headers
             for (Map.Entry<String, String> header : config.buildHeaders().entrySet()) {
                 connection.setRequestProperty(header.getKey(), header.getValue());
             }
             
-            // Write request body
             try (OutputStream os = connection.getOutputStream()) {
                 byte[] input = gson.toJson(requestBody).getBytes(StandardCharsets.UTF_8);
                 os.write(input, 0, input.length);
             }
             
-            // Check response code
             int responseCode = connection.getResponseCode();
             if (responseCode != 200) {
                 String errorBody = readErrorStream(connection);
@@ -352,7 +349,6 @@ public class AIService {
                 return;
             }
             
-            // Read streaming response
             StringBuilder fullResponse = new StringBuilder();
             StringBuilder toolCallName = new StringBuilder();
             StringBuilder toolCallArgs = new StringBuilder();
@@ -362,16 +358,13 @@ public class AIService {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // SSE format: data: {...}
                     if (line.startsWith("data: ")) {
                         String data = line.substring(6);
                         
-                        // Check for stream end
                         if (data.equals("[DONE]")) {
                             break;
                         }
                         
-                        // Skip OpenRouter processing comments
                         if (data.startsWith(": OPENROUTER")) {
                             continue;
                         }
@@ -379,14 +372,12 @@ public class AIService {
                         try {
                             JsonObject chunk = JsonParser.parseString(data).getAsJsonObject();
                             
-                            // Check for errors in chunk
                             if (chunk.has("error")) {
                                 String errorMsg = chunk.getAsJsonObject("error").get("message").getAsString();
                                 onError.accept(errorMsg);
                                 return;
                             }
                             
-                            // Extract content from chunk
                             if (chunk.has("choices")) {
                                 JsonArray choices = chunk.getAsJsonArray("choices");
                                 if (choices.size() > 0) {
@@ -394,19 +385,16 @@ public class AIService {
                                     if (choice.has("delta")) {
                                         JsonObject delta = choice.getAsJsonObject("delta");
                                         
-                                        // Check for tool calls
                                         if (delta.has("tool_calls")) {
                                             isToolCall = true;
                                             JsonArray toolCalls = delta.getAsJsonArray("tool_calls");
                                             if (toolCalls.size() > 0) {
                                                 JsonObject toolCall = toolCalls.get(0).getAsJsonObject();
                                                 
-                                                // Get tool call ID
                                                 if (toolCall.has("id")) {
                                                     toolCallId = toolCall.get("id").getAsString();
                                                 }
                                                 
-                                                // Get function details
                                                 if (toolCall.has("function")) {
                                                     JsonObject function = toolCall.getAsJsonObject("function");
                                                     if (function.has("name")) {
@@ -419,7 +407,6 @@ public class AIService {
                                             }
                                         }
                                         
-                                        // Regular content
                                         if (delta.has("content")) {
                                             String content = delta.get("content").getAsString();
                                             fullResponse.append(content);
@@ -428,7 +415,6 @@ public class AIService {
                                 }
                             }
                         } catch (Exception e) {
-                            // Skip malformed chunks
                             if (config.isDebugEnabled()) {
                                 plugin.getLogger().warning("Malformed chunk: " + data);
                             }
@@ -437,46 +423,38 @@ public class AIService {
                 }
             }
             
-            // Handle tool call if detected
             if (isToolCall && toolCallId != null) {
                 String functionName = toolCallName.toString();
                 String arguments = toolCallArgs.toString().trim();
                 
-                // Validate that we have valid tool call data
                 if (functionName.isEmpty()) {
                     plugin.getLogger().warning("Tool call detected but function name is empty");
                     onError.accept("error.api-error");
                     return;
                 }
                 
-                // Validate arguments are valid JSON (must start with { and end with })
                 if (!arguments.startsWith("{") || !arguments.endsWith("}")) {
                     plugin.getLogger().warning("Tool call arguments incomplete or malformed: " + arguments);
-                    // Skip tool call and try to get final answer from regular response
                     isToolCall = false;
                 } else {
                     plugin.getLogger().info("[TOOL CALL] Function: " + functionName + " | Args: " + arguments);
                     
-                    // Show fun message to user
                     String[] funMessages = {
-                        "🔍 Diving into my knowledge vault...",
-                        "📚 Searching the ancient scrolls...",
-                        "🌟 Summoning extra information...",
-                        "🗂️ Checking the secret files...",
-                        "💫 Gathering more details...",
-                        "🔎 Digging deeper for you..."
+                        "Diving into my knowledge vault...",
+                        "Searching the ancient scrolls...",
+                        "Summoning extra information...",
+                        "Checking the secret files...",
+                        "Gathering more details...",
+                        "Digging deeper for you..."
                     };
                     String toolMsg = funMessages[(int)(Math.random() * funMessages.length)];
                     onToolUse.accept(toolMsg);
                     plugin.getLogger().info("[TOOL MESSAGE] Sent to user: " + toolMsg);
                     
-                    // Execute tool
                     String toolResult = executeTool(functionName, arguments);
                     
-                    // Make second request with tool result
                     JsonArray messages = requestBody.getAsJsonArray("messages");
                     
-                    // Add assistant's tool call to conversation
                     JsonObject assistantMessage = new JsonObject();
                     assistantMessage.addProperty("role", "assistant");
                     assistantMessage.addProperty("content", "");
@@ -494,14 +472,12 @@ public class AIService {
                     
                     messages.add(assistantMessage);
                     
-                    // Add tool result
                     JsonObject toolMessage = new JsonObject();
                     toolMessage.addProperty("role", "tool");
                     toolMessage.addProperty("tool_call_id", toolCallId);
                     toolMessage.addProperty("content", toolResult);
                     messages.add(toolMessage);
                     
-                    // Build new request with tool result - force JSON format now
                     JsonObject newRequestBody = new JsonObject();
                     newRequestBody.addProperty("model", config.getModel());
                     newRequestBody.add("messages", messages);
@@ -513,20 +489,17 @@ public class AIService {
                     responseFormat.addProperty("type", "json_object");
                     newRequestBody.add("response_format", responseFormat);
                     
-                    // Make second request recursively
                     streamRequest(newRequestBody, onChunk, onToolUse, onComplete, onError);
                     return;
                 }
             }
             
-            // Parse the JSON response (no tool call path)
             String jsonResponse = fullResponse.toString().trim();
             
             if (config.isDebugEnabled()) {
                 plugin.getLogger().info("AI Raw Response: " + jsonResponse);
             }
             
-            // Parse JSON and extract fields
             String displayText = "";
             String shortDescription = "No summary available";
             String title = "Question";
@@ -538,7 +511,6 @@ public class AIService {
                 return;
             }
             
-            // Validate JSON starts with { and ends with }
             if (!jsonResponse.startsWith("{") || !jsonResponse.endsWith("}")) {
                 plugin.getLogger().warning("Invalid JSON format - doesn't start with { or end with }");
                 plugin.getLogger().warning("Response starts with: " + jsonResponse.substring(0, Math.min(50, jsonResponse.length())));
@@ -572,7 +544,6 @@ public class AIService {
                 plugin.getLogger().severe("FULL RESPONSE LENGTH: " + jsonResponse.length() + " chars");
                 plugin.getLogger().severe("FULL RESPONSE: " + jsonResponse);
                 
-                // Try to extract JSON from malformed response
                 String extracted = extractJsonFromResponse(jsonResponse);
                 if (extracted == null || extracted.isEmpty()) {
                     plugin.getLogger().severe("[EXTRACTION FAILED] Could not find valid JSON in response");
@@ -582,7 +553,6 @@ public class AIService {
                 }
                 
                 plugin.getLogger().info("[EXTRACTION SUCCESS] Extracted " + extracted.length() + " chars");
-                plugin.getLogger().info("Attempting to parse extracted JSON: " + extracted.substring(0, Math.min(100, extracted.length())));
                 try {
                     JsonObject responseObj = JsonParser.parseString(extracted).getAsJsonObject();
                     if (responseObj.has("answer")) {
@@ -596,28 +566,23 @@ public class AIService {
                         if (responseObj.has("relevance_score")) {
                             relevanceScore = responseObj.get("relevance_score").getAsInt();
                         }
-                        plugin.getLogger().info("[EXTRACTION PARSED] Successfully parsed extracted JSON!");
                     } else {
-                        plugin.getLogger().severe("[EXTRACTION PARSE ERROR] No 'answer' field in extracted JSON");
                         onError.accept("error.api-error");
                         return;
                     }
                 } catch (Exception e2) {
                     plugin.getLogger().severe("[EXTRACTION PARSE FAILED] " + e2.getMessage());
-                    plugin.getLogger().severe("Extracted JSON was: " + extracted);
                     onError.accept("error.api-error");
                     return;
                 }
             }
             
-            // Send the answer as one chunk
             if (!displayText.isEmpty()) {
                 onChunk.accept(displayText);
             }
             
             AIResponse response = new AIResponse(displayText, shortDescription, title, relevanceScore);
             
-            // Log response if debug enabled
             if (config.isLogResponses()) {
                 plugin.getLogger().info("AI Response: " + fullResponse);
             }
@@ -629,10 +594,6 @@ public class AIService {
         }
     }
     
-    /**
-     * Extract valid JSON from a potentially malformed response
-     * Looks for the first { and matches it with the last }
-     */
     private String extractJsonFromResponse(String response) {
         if (response == null || response.isEmpty()) {
             return null;
@@ -648,16 +609,12 @@ public class AIService {
         return null;
     }
     
-    /**
-     * Execute a tool function call
-     */
     private String executeTool(String functionName, String arguments) {
         if (!functionName.equals("fetch_context")) {
             return "Unknown function: " + functionName;
         }
         
         try {
-            // Parse arguments with better error handling
             if (arguments == null || arguments.isEmpty()) {
                 return "Error: No arguments provided to fetch_context";
             }
@@ -685,9 +642,6 @@ public class AIService {
         }
     }
     
-    /**
-     * Make a non-streaming request to the API
-     */
     private void nonStreamRequest(
             JsonObject requestBody,
             Consumer<String> onChunk,
@@ -705,18 +659,15 @@ public class AIService {
             connection.setConnectTimeout(config.getTimeout() * 1000);
             connection.setReadTimeout(config.getTimeout() * 1000);
             
-            // Set headers
             for (Map.Entry<String, String> header : config.buildHeaders().entrySet()) {
                 connection.setRequestProperty(header.getKey(), header.getValue());
             }
             
-            // Write request body
             try (OutputStream os = connection.getOutputStream()) {
                 byte[] input = gson.toJson(requestBody).getBytes(StandardCharsets.UTF_8);
                 os.write(input, 0, input.length);
             }
             
-            // Check response code
             int responseCode = connection.getResponseCode();
             if (responseCode != 200) {
                 String errorBody = readErrorStream(connection);
@@ -724,7 +675,6 @@ public class AIService {
                 return;
             }
             
-            // Read full response
             StringBuilder response = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
@@ -733,14 +683,12 @@ public class AIService {
                 }
             }
             
-            // Parse response
             JsonObject jsonResponse = JsonParser.parseString(response.toString()).getAsJsonObject();
             String jsonContent = jsonResponse.getAsJsonArray("choices")
                     .get(0).getAsJsonObject()
                     .getAsJsonObject("message")
                     .get("content").getAsString();
             
-            // Parse JSON
             String displayText = "";
             String shortDescription = "No summary available";
             String title = "Question";
@@ -766,10 +714,8 @@ public class AIService {
                 displayText = jsonContent;
             }
             
-            // Send answer
             onChunk.accept(displayText);
             
-            // Complete
             AIResponse aiResponse = new AIResponse(displayText, shortDescription, title, relevanceScore);
             onComplete.accept(aiResponse);
             
@@ -778,13 +724,6 @@ public class AIService {
         }
     }
     
-    /**
-     * Parse the full response to extract metadata
-     */
-    
-    /**
-     * Read error stream from connection
-     */
     private String readErrorStream(HttpURLConnection connection) {
         try {
             if (connection.getErrorStream() != null) {
@@ -798,14 +737,10 @@ public class AIService {
                 return error.toString();
             }
         } catch (Exception e) {
-            // Ignore
         }
         return "";
     }
     
-    /**
-     * Handle API errors with appropriate user messages
-     */
     private void handleApiError(int responseCode, String errorBody, Consumer<String> onError) {
         String errorKey;
         switch (responseCode) {
@@ -830,9 +765,6 @@ public class AIService {
         onError.accept(errorKey);
     }
     
-    /**
-     * Response data class
-     */
     public static class AIResponse {
         private final String displayText;
         private final String shortDescription;
@@ -843,7 +775,7 @@ public class AIService {
             this.displayText = displayText;
             this.shortDescription = shortDescription.isEmpty() ? "No summary available" : shortDescription;
             this.title = title.isEmpty() ? "Question" : title;
-            this.relevanceScore = Math.max(0, Math.min(10, relevanceScore)); // Clamp 0-10
+            this.relevanceScore = Math.max(0, Math.min(10, relevanceScore));
         }
         
         public String getDisplayText() { return displayText; }

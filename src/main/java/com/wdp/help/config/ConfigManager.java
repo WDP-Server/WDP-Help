@@ -49,6 +49,11 @@ public class ConfigManager {
     private boolean logRequests;
     private boolean logResponses;
     
+    // Thread Settings
+    private boolean threadWarningEnabled;
+    private int maxThreads;
+    private int threadQueueSize;
+    
     public ConfigManager(WDPHelpPlugin plugin) {
         this.plugin = plugin;
         reload();
@@ -99,6 +104,11 @@ public class ConfigManager {
         debugEnabled = config.getBoolean("debug.enabled", false);
         logRequests = config.getBoolean("debug.log-requests", false);
         logResponses = config.getBoolean("debug.log-responses", false);
+        
+        // Thread Settings
+        threadWarningEnabled = config.getBoolean("thread.warning-enabled", true);
+        maxThreads = config.getInt("thread.max-threads", 10);
+        threadQueueSize = config.getInt("thread.queue-size", 50);
     }
     
     /**
@@ -157,4 +167,8 @@ public class ConfigManager {
     public boolean isDebugEnabled() { return debugEnabled; }
     public boolean isLogRequests() { return logRequests; }
     public boolean isLogResponses() { return logResponses; }
+    
+    public boolean isThreadWarningEnabled() { return threadWarningEnabled; }
+    public int getMaxThreads() { return maxThreads; }
+    public int getThreadQueueSize() { return threadQueueSize; }
 }
